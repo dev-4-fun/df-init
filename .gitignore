@@ -1,0 +1,5 @@
+# Webstorm config
+.idea/
+
+# libraries
+node_modules/
