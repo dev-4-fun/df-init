@@ -7,22 +7,25 @@ if (destDirName) {
   realPath = path.join(realPath, destDirName);
   fs.mkdirSync(realPath);
 }
-const defaultName = realPath.split(path.sep).slice(-1).join();
-process.stdin.setEncoding('utf8');
-ask(`What's name of your package?(${defaultName}): `, (data) => {
-  const packageJson = {
-    name: defaultName,
-    author: 'Gribadze <fedor.dmitry@gmail.com>',
-    license: 'MIT',
-  };
-  if (data.trim().length > 0) {
-    packageJson.name = data.trim();
-  }
-  initPackage(packageJson);
-});
-function initPackage(packageJson) {
-  fs.writeFileSync(
-    path.join(realPath, 'package.json'),
-    JSON.stringify(packageJson, null, 2),
-  );
+const packageJson = {
+  name: realPath.split(path.sep).slice(-1)[0],
+  author: getDefautlAuthor(),
+  license: 'MIT',
+};
+initPackage();
+function initPackage() {
+  ask(`What's name of your package?(${packageJson.name}): `)
+    .then(() => ask(`What is your name?(${packageJson.author}): `))
+    .then(() => {
+      fs.writeFileSync(
+        path.join(realPath, 'package.json'),
+        JSON.stringify(packageJson, null, 2),
+      );
+    });
+}
+
+function getDefautlAuthor() {
+  let author = 'Gribadze <fedor.dmitry@gmail.com>';
+
+  return author;
 }
