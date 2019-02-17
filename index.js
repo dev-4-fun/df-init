@@ -1,33 +1,28 @@
 const fs = require('fs');
 const path = require('path');
+const ask = require('./interactor').ask;
 const destDirName = process.argv[2];
 let realPath = path.resolve(__dirname);
 if (destDirName) {
   realPath = path.join(realPath, destDirName);
   fs.mkdirSync(realPath);
 }
-let packageName = realPath.split(path.sep).slice(-1).join();
+const defaultName = realPath.split(path.sep).slice(-1).join();
 process.stdin.setEncoding('utf8');
-process.stdin.on('data', (data) => {
+ask(`What's name of your package?(${defaultName}): `, (data) => {
+  const packageJson = {
+    name: defaultName,
+    author: 'Gribadze <fedor.dmitry@gmail.com>',
+    license: 'MIT',
+  };
   if (data.trim().length > 0) {
-    packageName = data.trim();
+    packageJson.name = data.trim();
   }
-  process.stdin.pause();
-  initPackage();
+  initPackage(packageJson);
 });
-function initPackage() {
-  if (fs.readdirSync(realPath).length === 0) {
-    if (packageName === '\n') {
-      packageName = realPath.split(path.sep).slice(-1).join();
-    }
-    const packageJson = {
-      name: packageName,
-      author: 'Gribadze <fedor.dmitry@gmail.com>',
-      license: 'MIT',
-    };
-    fs.writeFileSync(
-      path.join(realPath, 'package.json'),
-      JSON.stringify(packageJson, null, 2),
-    );
-  }
+function initPackage(packageJson) {
+  fs.writeFileSync(
+    path.join(realPath, 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+  );
 }
