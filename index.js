@@ -9,13 +9,15 @@ if (destDirName) {
 }
 const packageJson = {
   name: realPath.split(path.sep).slice(-1)[0],
-  author: getDefautlAuthor(),
+  author: getDefaultAuthor(),
   license: 'MIT',
 };
 initPackage();
 function initPackage() {
-  ask(`What's name of your package?(${packageJson.name}): `)
-    .then(() => ask(`What is your name?(${packageJson.author}): `))
+  ask(`What's your package name?(${packageJson.name}): `)
+    .then(name => packageJson.name = name)
+    .then(() => ask(`What's your name?(${packageJson.author}): `))
+    .then(author => packageJson.author = author)
     .then(() => {
       fs.writeFileSync(
         path.join(realPath, 'package.json'),
@@ -23,9 +25,14 @@ function initPackage() {
       );
     });
 }
-
-function getDefautlAuthor() {
-  let author = 'Gribadze <fedor.dmitry@gmail.com>';
-
-  return author;
+function getDefaultAuthor() {
+  const homeDir = process.env.HOME;
+  const gitConfig = fs.readFileSync(path.join(homeDir, '.gitconfig'), { encoding: 'utf8' });
+  const userData = /\[user]([\s\S]*?)\[/.exec(gitConfig)[1];
+  if (userData) {
+    const userName = /name.?=.?(.*)/g.exec(userData)[1];
+    const userEmail = /email.?=.?(.*)/g.exec(userData)[1];
+    return `${userName} <${userEmail}>`;
+  }
+  return '';
 }
