@@ -3,3 +3,6 @@
 
 # libraries
 node_modules/
+
+# misc
+test/
