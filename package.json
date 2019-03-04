@@ -1,7 +1,7 @@
 {
   "name": "df-init",
   "version": "1.0.0",
-  "description": "Utitlity for project creation",
+  "description": "Utility for project creation",
   "main": "index.js",
   "scripts": {
     "test": "jest",

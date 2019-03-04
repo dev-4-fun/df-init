@@ -1,29 +1,25 @@
 const fs = require('fs');
 const path = require('path');
-const ask = require('./interactor').ask;
+const { ask } = require('./interactor');
 const destDirName = process.argv[2];
 let realPath = path.resolve(__dirname);
-if (destDirName) {
-  realPath = path.join(realPath, destDirName);
-  fs.mkdirSync(realPath);
-}
 const packageJson = {
   name: realPath.split(path.sep).slice(-1)[0],
   author: getDefaultAuthor(),
   license: 'MIT',
 };
-initPackage();
-function initPackage() {
-  ask(`What's your package name?(${packageJson.name}): `)
-    .then(name => packageJson.name = name)
-    .then(() => ask(`What's your name?(${packageJson.author}): `))
-    .then(author => packageJson.author = author)
-    .then(() => {
-      fs.writeFileSync(
-        path.join(realPath, 'package.json'),
-        JSON.stringify(packageJson, null, 2),
-      );
-    });
+initPackage().then(() => console.log('Done'));
+async function initPackage() {
+  packageJson.name = await ask(`What's your package name?(${packageJson.name}): `);
+  packageJson.author = await ask(`What's your name?(${packageJson.author}): `);
+  if (destDirName) {
+    realPath = path.join(realPath, destDirName);
+    fs.mkdirSync(realPath);
+  }
+  fs.writeFileSync(
+    path.join(realPath, 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+  );
 }
 function getDefaultAuthor() {
   const homeDir = process.env.HOME;
