@@ -6,4 +6,9 @@ describe('githubApi', () => {
     const data = await githubApi.test();
     expect(data).toMatch(/^.*\.$/);
   });
+  test('userInfo should return JSON', async () => {
+    githubApi.userInfo = githubApi.userInfo || function () { };
+    const data = await githubApi.userInfo('gribadze');
+    expect(data).toHaveProperty('id');
+  })
 });
