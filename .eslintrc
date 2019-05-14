@@ -4,6 +4,10 @@
     "jest": true,
     "node": true
   },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 8
+  }
   "extends": [
     "eslint:recommended",
     "plugin:jest/recommended"

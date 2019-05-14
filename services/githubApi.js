@@ -1,5 +1,5 @@
-const https = require('https');
 const { isFunction } = require('../helpers/isFunction');
+const request = require('../helpers/isFunction');
 
 const baseUrl = 'https://api.github.com';
 const headers = {
@@ -7,39 +7,41 @@ const headers = {
   'Accept': 'application/vnd.github.v3_json'
 };
 
-const githubApiConfig = {
+let githubApi = {
   test: { path: '/zen' },
   userInfo: {
     path: userName => `/users/${userName}`
   }
 }
 
-const githubApi = Object.keys(githubApiConfig)
+githubApi = Object.keys(githubApi)
   .reduce((api, callConfigName) => {
-    const { method = 'get', path } = githubApiConfig[callConfigName];
+    const { method = 'get', path } = githubApi[callConfigName];
     return {
       ...api,
-      [callConfigName]: (...args) => apiCall(method, isFunction(path) ? path(...args) : path)
+      [callConfigName]: (paramsOrCallback, callback) => {
+        let cb = callback;
+        let params = paramsOrCallback;
+        if (isFunction(paramsOrCallback)) {
+          params = null;
+          cb = paramsOrCallback;
+        }
+        return apiCall(method, isFunction(path) ? path(params) : path, cb);
+      }
     };
   }, {});
 
-function apiCall(method, path) {
-  return new Promise((resolve, reject) =>
-    https[method](baseUrl + (path ? path : ''), { headers }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (error) {
-          resolve(data);
+function apiCall(method, url, callback) {
+  if (typeof callback === 'undefined') {
+    return new Promise((resolve, reject) =>
+      request({ method, url: baseUrl + url, headers }, (err, data) => {
+        if (err) {
+          reject(err);
         }
-      })
-    }).on('error', (error) => {
-      reject(`Error <githubApi>: ${error.message}`)
-    }));
+        resolve(data)
+      }));
+  }
+  return request({ method, url: baseUrl + url, headers }, callback);
 }
 
 module.exports = githubApi;

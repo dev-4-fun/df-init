@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ask } = require('./interactor');
-const destDirName = process.argv[2];
+const destinationDir = process.argv[2];
 let realPath = path.resolve(__dirname);
 const packageJson = {
   name: realPath.split(path.sep).slice(-1)[0],
@@ -12,8 +12,8 @@ initPackage().then(() => console.log('Done'));
 async function initPackage() {
   packageJson.name = await ask(`What's your package name?(${packageJson.name}): `);
   packageJson.author = await ask(`What's your name?(${packageJson.author}): `);
-  if (destDirName) {
-    realPath = path.join(realPath, destDirName);
+  if (destinationDir) {
+    realPath = path.join(realPath, destinationDir);
     fs.mkdirSync(realPath);
   }
   fs.writeFileSync(
